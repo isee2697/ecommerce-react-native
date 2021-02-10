@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import {
   View,
   StyleSheet,
@@ -49,83 +49,76 @@ export const HomeScreen = ({ navigation }) => {
       }
     };
     fetching();
-  }, [user.id]);
-
-  if (isLoading) {
-    return (
-      <View style={styles.center}>
-        <Skeleton />
-      </View>
-    );
-  }
+  }, [user.userid]);
 
   return (
-    <View style={styles.container}>
-      <Provider>
-        <Header
-          scrollPoint={scrollY}
-          navigation={navigation}
-          products={products}
-        ></Header>
-        <Portal>
-          <FloatButton />
-        </Portal>
-        <AnimatedFlatList
-          style={{ width: '100%' }}
-          showsVerticalScrollIndicator={false}
-          bounces={Platform.OS === 'android' ? true : false}
-          scrollEventThrottle={1}
-          onScroll={Animated.event(
-            [
-              {
-                nativeEvent: { contentOffset: { y: scrollY } },
-              },
-            ],
-            { useNativeDriver: true },
-          )}
-          data={categories}
-          keyExtractor={(item) => item.name}
-          renderItem={({ item }) => (
-            <CategorySection
-              name={item.name}
-              bg={item.bg}
-              data={products}
-              navigation={navigation}
+    <Provider>
+      {isLoading ? (
+        <Skeleton />
+      ) : (
+        <View style={styles.container}>
+          <Header
+            scrollPoint={scrollY}
+            navigation={navigation}
+            products={products}
+          ></Header>
+          <Portal>
+            <FloatButton />
+          </Portal>
+          <AnimatedFlatList
+            contentContainerStyle={styles.list}
+            showsVerticalScrollIndicator={false}
+            ListHeaderComponent={() => (
+              <View style={styles.banner}>
+                <Carousel />
+              </View>
+            )}
+            scrollEventThrottle={1}
+            onScroll={Animated.event(
+              [
+                {
+                  nativeEvent: { contentOffset: { y: scrollY } },
+                },
+              ],
+              { useNativeDriver: true },
+            )}
+            data={categories}
+            keyExtractor={(item) => item.name}
+            renderItem={({ item }) => (
+              <CategorySection
+                name={item.name}
+                bg={item.bg}
+                data={products}
+                navigation={navigation}
+              />
+            )}
+          />
+          {Object.keys(notification).length === 0 ? (
+            <View />
+          ) : (
+            <Snackbar
+              checkVisible={true}
+              message={
+                Object.keys(user).length === 0
+                  ? notification
+                  : notification + ' ' + user.name
+              }
             />
           )}
-          ListHeaderComponent={() => (
-            <View style={styles.banner}>
-              <Carousel />
-            </View>
-          )}
-        />
-        {Object.keys(notification).length === 0 ? (
-          <View />
-        ) : (
-          <Snackbar
-            checkVisible={true}
-            message={
-              Object.keys(user).length === 0
-                ? notification
-                : notification + ' ' + user.name
-            }
-          />
-        )}
-      </Provider>
-    </View>
+        </View>
+      )}
+    </Provider>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: Colors.white,
   },
-  center: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: Colors.light_bg,
-    marginTop: Platform.OS === 'android' ? 75 : height < 668 ? 75 : 100,
+  list: {
+    width: '100%',
+    marginTop: 50,
+    paddingBottom: 20,
   },
 });
